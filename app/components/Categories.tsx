@@ -15,130 +15,108 @@ const categoryData: Record<
   { image: string; description: string; color: string }
 > = {
   smartphones: {
-    image: "/placeholder.svg?height=300&width=400&text=Latest+Smartphones",
+    image: "/placeholder.svg",
     description: "Latest smartphones with cutting-edge technology",
     color: "from-blue-500 to-cyan-500",
   },
   laptops: {
-    image: "/placeholder.svg?height=300&width=400&text=Premium+Laptops",
+    image: "/placeholder.svg",
     description: "High-performance laptops for work and gaming",
     color: "from-gray-600 to-gray-800",
   },
   fragrances: {
-    image: "/placeholder.svg?height=300&width=400&text=Luxury+Fragrances",
+    image: "/placeholder.svg",
     description: "Luxury fragrances and premium scents",
     color: "from-pink-500 to-rose-500",
   },
   skincare: {
-    image: "/placeholder.svg?height=300&width=400&text=Skincare+Products",
+    image: "/placeholder.svg",
     description: "Premium skincare and beauty products",
     color: "from-green-400 to-emerald-500",
   },
   groceries: {
-    image: "/placeholder.svg?height=300&width=400&text=Fresh+Groceries",
+    image: "/placeholder.svg",
     description: "Fresh groceries and organic products",
     color: "from-orange-400 to-yellow-500",
   },
   "home-decoration": {
-    image: "/placeholder.svg?height=300&width=400&text=Home+Decor",
+    image: "/placeholder.svg",
     description: "Beautiful home decoration and accessories",
     color: "from-purple-500 to-indigo-500",
   },
   furniture: {
-    image: "/placeholder.svg?height=300&width=400&text=Modern+Furniture",
+    image: "/placeholder.svg",
     description: "Modern furniture for every room",
     color: "from-amber-600 to-orange-600",
   },
   tops: {
-    image: "/placeholder.svg?height=300&width=400&text=Fashion+Tops",
+    image: "/placeholder.svg",
     description: "Trendy tops and fashion wear",
     color: "from-red-500 to-pink-500",
   },
   "womens-dresses": {
-    image: "/placeholder.svg?height=300&width=400&text=Women's+Dresses",
+    image: "/placeholder.svg",
     description: "Elegant dresses for every occasion",
     color: "from-violet-500 to-purple-500",
   },
   "womens-shoes": {
-    image: "/placeholder.svg?height=300&width=400&text=Women's+Shoes",
+    image: "/placeholder.svg",
     description: "Stylish shoes and footwear",
     color: "from-teal-500 to-cyan-500",
   },
   "mens-shirts": {
-    image: "/placeholder.svg?height=300&width=400&text=Men's+Shirts",
+    image: "/placeholder.svg",
     description: "Premium shirts for modern men",
     color: "from-slate-600 to-gray-700",
   },
   "mens-shoes": {
-    image: "/placeholder.svg?height=300&width=400&text=Men's+Shoes",
+    image: "/placeholder.svg",
     description: "Quality footwear for men",
     color: "from-stone-600 to-neutral-700",
   },
   "mens-watches": {
-    image: "/placeholder.svg?height=300&width=400&text=Men's+Watches",
+    image: "/placeholder.svg",
     description: "Luxury watches and timepieces",
     color: "from-yellow-600 to-amber-600",
   },
   "womens-watches": {
-    image: "/placeholder.svg?height=300&width=400&text=Women's+Watches",
+    image: "/placeholder.svg",
     description: "Elegant watches for women",
     color: "from-rose-500 to-pink-600",
   },
   "womens-bags": {
-    image: "/placeholder.svg?height=300&width=400&text=Women's+Bags",
+    image: "/placeholder.svg",
     description: "Designer bags and accessories",
     color: "from-indigo-500 to-blue-600",
   },
   "womens-jewellery": {
-    image: "/placeholder.svg?height=300&width=400&text=Women's+Jewelry",
+    image: "/placeholder.svg",
     description: "Beautiful jewelry and accessories",
-    color: "from-yellow-500 to-gold-500",
+    color: "from-yellow-500 to-amber-500",
   },
   sunglasses: {
-    image: "/placeholder.svg?height=300&width=400&text=Sunglasses",
+    image: "/placeholder.svg",
     description: "Stylish sunglasses and eyewear",
     color: "from-gray-700 to-black",
   },
   automotive: {
-    image: "/placeholder.svg?height=300&width=400&text=Automotive",
+    image: "/placeholder.svg",
     description: "Auto parts and accessories",
     color: "from-red-600 to-red-800",
   },
   motorcycle: {
-    image: "/placeholder.svg?height=300&width=400&text=Motorcycle",
+    image: "/placeholder.svg",
     description: "Motorcycle gear and accessories",
     color: "from-orange-600 to-red-600",
   },
   lighting: {
-    image: "/placeholder.svg?height=300&width=400&text=Lighting",
+    image: "/placeholder.svg",
     description: "Modern lighting solutions",
     color: "from-yellow-400 to-orange-500",
   },
 };
 
-export default async function Categories({
-  categories,
-}: Readonly<CategoriesProps>) {
-  // Get product counts for categories (simulate since API doesn't provide exact counts)
-  const categoriesWithData = await Promise.all(
-    categories.slice(0, 12).map(async (category, index) => {
-      // Simulate product counts
-      const productCount = Math.floor(Math.random() * 500) + 50;
-      const data = categoryData[category.slug] || {
-        image: "/placeholder.svg?height=300&width=400",
-        description: "Discover amazing products",
-        color: "from-gray-500 to-gray-700",
-      };
-
-      return {
-        ...category,
-        productCount,
-        ...data,
-        isPopular: index < 4, // Mark first 4 as popular
-      };
-    })
-  );
-
+export default function Categories({ categories }: CategoriesProps) {
   const formatCategoryName = (name: string) => {
     return name
       .split("-")
@@ -146,11 +124,30 @@ export default async function Categories({
       .join(" ");
   };
 
+  // Get product counts for categories (simulate since API doesn't provide exact counts)
+  const categoriesWithData = categories.slice(0, 12).map((category, index) => {
+    // Simulate product counts
+    const productCount = Math.floor(Math.random() * 500) + 50;
+    const data = categoryData[category.slug] || {
+      image: "/placeholder.svg?height=300&width=400",
+      description: "Discover amazing products",
+      color: "from-gray-500 to-gray-700",
+    };
+
+    return {
+      ...category,
+      productCount,
+      ...data,
+      isPopular: index < 4, // Mark first 4 as popular
+    };
+  });
+
   if (categoriesWithData.length === 0) {
     return (
-      <section className="py-20 bg-white">
+      <section id="categories" className="py-20 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
+            <div className="shimmer inline-block bg-gray-200 rounded-lg w-16 h-16 mb-4"></div>
             <p className="text-gray-600">Loading categories...</p>
           </div>
         </div>
@@ -159,13 +156,13 @@ export default async function Categories({
   }
 
   return (
-    <section className="py-20 bg-white">
+    <section id="categories" className="py-20 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 text-balance">
             Shop by Category
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
             Explore our diverse collection of premium products across multiple
             categories, each carefully curated for quality and style.
           </p>
@@ -176,7 +173,7 @@ export default async function Categories({
           {categoriesWithData.slice(0, 6).map((category, index) => (
             <Link key={category.slug} href={`/category/${category.slug}`}>
               <Card
-                className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg overflow-hidden cursor-pointer animate-slide-up"
+                className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg overflow-hidden cursor-pointer animate-slide-up hover:-translate-y-2"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-0">
@@ -198,8 +195,8 @@ export default async function Categories({
                     {/* Popular badge */}
                     {category.isPopular && (
                       <div className="absolute top-4 right-4">
-                        <div className="flex items-center bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-lg">
-                          <TrendingUp className="h-4 w-4 text-orange-500 mr-1" />
+                        <div className="flex items-center glass rounded-full px-3 py-1 shadow-lg">
+                          <TrendingUp className="w-4 h-4 text-orange-500 mr-1" />
                           <span className="text-xs font-bold text-gray-900">
                             Popular
                           </span>
@@ -209,10 +206,10 @@ export default async function Categories({
 
                     {/* Content overlay */}
                     <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
-                      <h3 className="text-2xl font-bold mb-2 group-hover:transform group-hover:translate-y-[-4px] transition-transform duration-300">
+                      <h3 className="text-2xl font-bold mb-2 group-hover:transform group-hover:translate-y-[-4px] transition-transform duration-300 text-balance">
                         {formatCategoryName(category.name)}
                       </h3>
-                      <p className="text-sm opacity-90 mb-3 line-clamp-2">
+                      <p className="text-sm opacity-90 mb-3 line-clamp-2 text-pretty">
                         {category.description}
                       </p>
                       <div className="flex items-center justify-between">
@@ -221,7 +218,7 @@ export default async function Categories({
                         </span>
                         <div className="flex items-center text-sm font-semibold group-hover:transform group-hover:translate-x-1 transition-transform duration-300">
                           Shop Now
-                          <ArrowRight className="h-4 w-4 ml-1" />
+                          <ArrowRight className="w-4 h-4 ml-1" />
                         </div>
                       </div>
                     </div>
@@ -236,7 +233,7 @@ export default async function Categories({
         {categoriesWithData.length > 6 && (
           <>
             <div className="text-center mb-12">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4 text-balance">
                 More Categories
               </h3>
             </div>
@@ -244,7 +241,7 @@ export default async function Categories({
               {categoriesWithData.slice(6, 12).map((category, index) => (
                 <Link key={category.slug} href={`/category/${category.slug}`}>
                   <Card
-                    className="group hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-gray-300 cursor-pointer animate-slide-up"
+                    className="group hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-gray-300 cursor-pointer animate-slide-up hover:-translate-y-1"
                     style={{ animationDelay: `${(index + 6) * 0.05}s` }}
                   >
                     <CardContent className="p-4 text-center">
@@ -261,7 +258,7 @@ export default async function Categories({
                           className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-40 group-hover:opacity-50 transition-opacity duration-300`}
                         ></div>
                       </div>
-                      <h4 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2 text-balance">
                         {formatCategoryName(category.name)}
                       </h4>
                       <p className="text-xs text-gray-500">
@@ -277,21 +274,14 @@ export default async function Categories({
 
         {/* CTA Section */}
         <div className="text-center">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 lg:p-12 max-w-2xl mx-auto">
-            <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
-              Can&apos;t Find What You&apos;re Looking For?
+          <div className="glass rounded-2xl p-8 lg:p-12 max-w-2xl mx-auto border border-gray-200">
+            <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 text-balance">
+              Can't Find What You're Looking For?
             </h3>
-            <p className="text-gray-600 mb-6">
-              Browse our complete collection of premium products across all
-              categories.
+            <p className="text-gray-600 mb-6 text-pretty">
+              Use our "All Products" dropdown in the navigation above to search
+              through our complete catalog.
             </p>
-            <Button
-              size="lg"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              View All Products
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Navigation from "./components/Navigation";
 import Hero from "./components/Hero";
 import FeaturedProducts from "./components/FeaturedProducts";
 import Categories from "./components/Categories";
@@ -19,12 +20,13 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const [featuredProducts, categories] = await Promise.all([
-    getFeaturedProducts(),
+    getFeaturedProducts(8),
     getCategories(),
   ]);
 
   return (
     <main className="min-h-screen bg-white">
+      <Navigation categories={categories} />
       <Hero />
       <FeaturedProducts products={featuredProducts} />
       <Categories categories={categories} />

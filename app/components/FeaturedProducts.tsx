@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Star, Heart, ShoppingCart } from "lucide-react"
+import { Star, Heart, ShoppingCart } from 'lucide-react'
 import type { Product } from "@/lib/types"
 
 interface FeaturedProductsProps {
@@ -18,9 +18,10 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
 
   if (products.length === 0) {
     return (
-      <section className="py-20 bg-gray-50">
+      <section id="featured-products" className="py-20 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
+            <div className="shimmer inline-block bg-gray-200 rounded-lg w-16 h-16 mb-4"></div>
             <p className="text-gray-600">Loading amazing products...</p>
           </div>
         </div>
@@ -29,11 +30,13 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
   }
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section id="featured-products" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">Featured Products</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 text-balance">
+            Featured Products
+          </h2>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto text-pretty">
             Handpicked selection of premium products, chosen for their exceptional quality, innovation, and customer
             satisfaction.
           </p>
@@ -48,7 +51,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
             return (
               <Card
                 key={product.id}
-                className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg bg-white overflow-hidden animate-slide-up"
+                className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg bg-white overflow-hidden animate-slide-up hover:-translate-y-2"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <CardContent className="p-0">
@@ -64,7 +67,9 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
 
                     {/* Badge */}
                     <div className="absolute top-4 left-4">
-                      <span className={`${badge.color} text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg`}>
+                      <span
+                        className={`${badge.color} text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg backdrop-blur-sm`}
+                      >
                         {badge.text}
                       </span>
                     </div>
@@ -72,20 +77,23 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                     {/* Discount badge */}
                     {product.discountPercentage > 0 && (
                       <div className="absolute top-4 right-4">
-                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                        <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg backdrop-blur-sm">
                           -{Math.round(product.discountPercentage)}%
                         </span>
                       </div>
                     )}
 
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    {/* Hover overlay with glass effect */}
+                    <div className="absolute inset-0 glass opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                       <div className="flex space-x-2">
-                        <Button size="sm" variant="secondary" className="shadow-lg">
-                          <Heart className="h-4 w-4" />
+                        <Button size="sm" variant="secondary" className="shadow-lg backdrop-blur-sm">
+                          <Heart className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" className="shadow-lg bg-white text-gray-900 hover:bg-gray-100">
-                          <ShoppingCart className="h-4 w-4 mr-2" />
+                        <Button
+                          size="sm"
+                          className="shadow-lg bg-white text-gray-900 hover:bg-gray-100 backdrop-blur-sm"
+                        >
+                          <ShoppingCart className="w-4 h-4 mr-2" />
                           Quick Add
                         </Button>
                       </div>
@@ -96,7 +104,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                     <div>
                       <p className="text-sm text-gray-500 font-medium">{product.brand}</p>
                       <h3
-                        className="font-bold text-gray-900 text-lg line-clamp-2 group-hover:text-blue-600 transition-colors"
+                        className="font-bold text-gray-900 text-lg line-clamp-2 group-hover:text-blue-600 transition-colors text-balance"
                         title={product.title}
                       >
                         {product.title}
@@ -109,7 +117,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`h-4 w-4 ${
+                            className={`w-4 h-4 ${
                               i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
                             }`}
                           />
@@ -132,7 +140,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                       {product.category.replace("-", " ")}
                     </div>
 
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300">
+                    <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                       Add to Cart
                     </Button>
                   </div>
@@ -143,13 +151,9 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
         </div>
 
         <div className="text-center mt-16">
-          <Button
-            variant="outline"
-            size="lg"
-            className="border-2 border-gray-300 hover:border-gray-400 px-8 py-4 text-lg font-semibold transition-all duration-300 hover:shadow-lg bg-transparent"
-          >
-            View All Products
-          </Button>
+          <p className="text-gray-600 mb-4">
+            Discover more amazing products in our navigation menu above!
+          </p>
         </div>
       </div>
     </section>
