@@ -1,14 +1,43 @@
+"use client"
+
+import type React from "react"
+
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Star, Heart, ShoppingCart } from 'lucide-react'
+import { Star, ShoppingCart } from "lucide-react"
 import type { Product } from "@/lib/types"
+import { useCart } from "@/app/contexts/CartContext"
 
 interface FeaturedProductsProps {
   products: Product[]
 }
 
 export default function FeaturedProducts({ products }: FeaturedProductsProps) {
+  const { addItem } = useCart()
+
+  const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    try {
+      addItem(product)
+
+      // Show a brief success animation
+      const button = e.currentTarget as HTMLElement
+      const originalText = button.textContent
+
+      button.textContent = "Added!"
+      button.classList.add("animate-pulse", "bg-green-600")
+
+      setTimeout(() => {
+        button.textContent = originalText
+        button.classList.remove("animate-pulse", "bg-green-600")
+      }, 1000)
+    } catch (error) {
+      console.error("Error adding to cart:", error)
+    }
+  }
+
   const getBadge = (product: Product) => {
     if (product.discountPercentage > 20) return { text: "Hot Deal", color: "bg-red-500" }
     if (product.rating > 4.5) return { text: "Top Rated", color: "bg-green-500" }
@@ -85,13 +114,11 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
 
                     {/* Hover overlay with glass effect */}
                     <div className="absolute inset-0 glass opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <div className="flex space-x-2">
-                        <Button size="sm" variant="secondary" className="shadow-lg backdrop-blur-sm">
-                          <Heart className="w-4 h-4" />
-                        </Button>
+                      <div className="flex justify-center">
                         <Button
                           size="sm"
-                          className="shadow-lg bg-white text-gray-900 hover:bg-gray-100 backdrop-blur-sm"
+                          className="shadow-lg bg-white text-gray-900 hover:bg-gray-100 backdrop-blur-sm px-6"
+                          onClick={(e) => handleAddToCart(product, e)}
                         >
                           <ShoppingCart className="w-4 h-4 mr-2" />
                           Quick Add
@@ -140,7 +167,10 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
                       {product.category.replace("-", " ")}
                     </div>
 
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                    <Button
+                      onClick={(e) => handleAddToCart(product, e)}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                    >
                       Add to Cart
                     </Button>
                   </div>
@@ -151,9 +181,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
         </div>
 
         <div className="text-center mt-16">
-          <p className="text-gray-600 mb-4">
-            Discover more amazing products in our navigation menu above!
-          </p>
+          <p className="text-gray-600 mb-4">Discover more amazing products in our navigation menu above!</p>
         </div>
       </div>
     </section>

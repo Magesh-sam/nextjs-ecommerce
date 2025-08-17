@@ -36,10 +36,7 @@ export default function CategoryLoading() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-lg shadow-lg overflow-hidden"
-              >
+              <div key={i} className="bg-white rounded-lg shadow-lg overflow-hidden">
                 <div className="w-full h-64 bg-gray-200 animate-pulse"></div>
                 <div className="p-6 space-y-4">
                   <div className="w-3/4 h-4 bg-gray-200 rounded animate-pulse"></div>
@@ -53,5 +50,5 @@ export default function CategoryLoading() {
         </div>
       </div>
     </div>
-  );
+  )
 }

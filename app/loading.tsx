@@ -9,8 +9,8 @@ export default function Loading() {
             style={{ animationDirection: "reverse", animationDuration: "1.5s" }}
           ></div>
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Amazing Products</h2>
-        <p className="text-gray-600">Preparing the best shopping experience for you...</p>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2 text-balance">Loading Amazing Products</h2>
+        <p className="text-gray-600 text-pretty">Preparing the best shopping experience for you...</p>
       </div>
     </div>
   )

@@ -1,6 +1,8 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { CartProvider } from "./contexts/CartContext"
+import CartSidebar from "./components/CartSidebar"
 import "./globals.css"
 
 const inter = Inter({
@@ -47,7 +49,7 @@ export const metadata: Metadata = {
   verification: {
     google: "your-google-verification-code",
   },
-    generator: 'v0.dev'
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
@@ -57,7 +59,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className={`${inter.className} antialiased`}>{children}</body>
+      <body className={`${inter.className} antialiased min-h-screen`}>
+        <CartProvider>
+          {children}
+          <CartSidebar />
+        </CartProvider>
+      </body>
     </html>
   )
 }
