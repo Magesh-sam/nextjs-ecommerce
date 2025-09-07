@@ -1,190 +1,224 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect, useRef } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { ShoppingCart, Search, Menu, User, ChevronDown, Star, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent } from "@/components/ui/card"
-import { getProducts, getCategories } from "@/lib/api"
-import { useCart } from "@/app/contexts/CartContext"
-import type { Product, Category } from "@/lib/types"
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { ShoppingCart, Search, Menu, ChevronDown, Star, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { getProducts, getCategories } from "@/lib/api";
+import { useCart } from "@/app/contexts/CartContext";
+import type { Product, Category } from "@/lib/types";
 
 export default function Header() {
-  const { state: cartState, addItem, toggleCart } = useCart()
-  const [isProductsOpen, setIsProductsOpen] = useState(false)
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [products, setProducts] = useState<Product[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(false)
+  const { state: cartState, addItem, toggleCart } = useCart();
+  const [isProductsOpen, setIsProductsOpen] = useState(false);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false);
 
   // Refs for click outside detection
-  const productsDropdownRef = useRef<HTMLDivElement>(null)
-  const categoriesDropdownRef = useRef<HTMLDivElement>(null)
-  const mobileMenuRef = useRef<HTMLDivElement>(null)
+  const productsDropdownRef = useRef<HTMLDivElement>(null);
+  const categoriesDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to close dropdowns
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (productsDropdownRef.current && !productsDropdownRef.current.contains(event.target as Node)) {
-        setIsProductsOpen(false)
+      if (
+        productsDropdownRef.current &&
+        !productsDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsProductsOpen(false);
       }
-      if (categoriesDropdownRef.current && !categoriesDropdownRef.current.contains(event.target as Node)) {
-        setIsCategoriesOpen(false)
+      if (
+        categoriesDropdownRef.current &&
+        !categoriesDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsCategoriesOpen(false);
       }
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
-        setIsMobileMenuOpen(false)
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsMobileMenuOpen(false);
       }
-    }
+    };
 
-    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [])
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
-      document.body.style.overflow = "hidden"
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "unset"
+      document.body.style.overflow = "unset";
     }
 
     return () => {
-      document.body.style.overflow = "unset"
-    }
-  }, [isMobileMenuOpen])
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
 
   // Load initial data
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
         const [productsData, categoriesData] = await Promise.all([
           getProducts(50).catch((err) => {
-            console.error("Failed to load products:", err)
-            return { products: [], total: 0 }
+            console.error("Failed to load products:", err);
+            return { products: [], total: 0 };
           }),
           getCategories().catch((err) => {
-            console.error("Failed to load categories:", err)
-            return []
+            console.error("Failed to load categories:", err);
+            return [];
           }),
-        ])
+        ]);
 
         // Ensure we have valid data with additional safety checks
         const validProducts = (productsData.products || []).filter(
-          (product) => product && product.id && typeof product.title === "string" && typeof product.price === "number",
-        )
+          (product) =>
+            product &&
+            product.id &&
+            typeof product.title === "string" &&
+            typeof product.price === "number"
+        );
 
-        setProducts(validProducts)
-        setCategories(categoriesData || [])
-        setFilteredProducts(validProducts.slice(0, 12)) // Show first 12 initially
+        setProducts(validProducts);
+        setCategories(categoriesData || []);
+        setFilteredProducts(validProducts.slice(0, 12)); // Show first 12 initially
+        setFilteredCategories(categoriesData || []);
       } catch (error) {
-        console.error("Error loading header data:", error)
+        console.error("Error loading header data:", error);
         // Set empty arrays as fallback
-        setProducts([])
-        setCategories([])
-        setFilteredProducts([])
+        setProducts([]);
+        setCategories([]);
+        setFilteredProducts([]);
+        setFilteredCategories([]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadData()
-  }, [])
+    loadData();
+  }, []);
 
-  // Filter products based on search
+  // Filter products and categories based on search
   useEffect(() => {
     if (searchQuery.trim() === "") {
-      setFilteredProducts(products.slice(0, 12))
+      setFilteredProducts(products.slice(0, 12));
+      setFilteredCategories(categories);
     } else {
-      const filtered = products.filter((product) => {
-        // Add null checks for all properties
-        const title = product.title?.toLowerCase() || ""
-        const brand = product.brand?.toLowerCase() || ""
-        const category = product.category?.toLowerCase() || ""
-        const query = searchQuery.toLowerCase()
+      const query = searchQuery.toLowerCase();
 
-        return title.includes(query) || brand.includes(query) || category.includes(query)
-      })
-      setFilteredProducts(filtered.slice(0, 12))
+      // Filter products
+      const filteredProds = products.filter((product) => {
+        const title = product.title?.toLowerCase() || "";
+        const brand = product.brand?.toLowerCase() || "";
+        const category = product.category?.toLowerCase() || "";
+        return (
+          title.includes(query) ||
+          brand.includes(query) ||
+          category.includes(query)
+        );
+      });
+      setFilteredProducts(filteredProds.slice(0, 12));
+
+      // Filter categories
+      const filteredCats = categories.filter((category) => {
+        const name = formatCategoryName(category.name).toLowerCase();
+        return name.includes(query);
+      });
+      setFilteredCategories(filteredCats);
     }
-  }, [searchQuery, products])
+  }, [searchQuery, products, categories]);
 
   const formatCategoryName = (name: string) => {
     return name
       .split("-")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ")
-  }
+      .join(" ");
+  };
 
   const getBadge = (product: Product) => {
-    if (!product) return { text: "Product", color: "bg-gray-500" }
+    if (!product) return { text: "Product", color: "bg-gray-500" };
 
-    const discount = product.discountPercentage || 0
-    const rating = product.rating || 0
-    const stock = product.stock || 0
+    const discount = product.discountPercentage || 0;
+    const rating = product.rating || 0;
+    const stock = product.stock || 0;
 
-    if (discount > 20) return { text: "Hot Deal", color: "bg-red-500" }
-    if (rating > 4.5) return { text: "Top Rated", color: "bg-green-500" }
-    if (stock < 10 && stock > 0) return { text: "Limited", color: "bg-orange-500" }
-    return { text: "Popular", color: "bg-blue-500" }
-  }
+    if (discount > 20) return { text: "Hot Deal", color: "bg-red-500" };
+    if (rating > 4.5) return { text: "Top Rated", color: "bg-green-500" };
+    if (stock < 10 && stock > 0)
+      return { text: "Limited", color: "bg-orange-500" };
+    return { text: "Popular", color: "bg-blue-500" };
+  };
 
   const handleAddToCart = (product: Product, e: React.MouseEvent) => {
-    e.stopPropagation()
+    e.stopPropagation();
 
     // Validate product before adding
-    if (!product || !product.id || !product.title || typeof product.price !== "number") {
-      console.error("Invalid product data:", product)
-      return
+    if (
+      !product ||
+      !product.id ||
+      !product.title ||
+      typeof product.price !== "number"
+    ) {
+      console.error("Invalid product data:", product);
+      return;
     }
 
-    addItem(product)
+    addItem(product);
     // Show a brief success animation or toast
-    const button = e.currentTarget as HTMLElement
-    button.classList.add("animate-pulse")
+    const button = e.currentTarget as HTMLElement;
+    button.classList.add("animate-pulse");
     setTimeout(() => {
-      button.classList.remove("animate-pulse")
-    }, 500)
-  }
+      button.classList.remove("animate-pulse");
+    }, 500);
+  };
 
   const toggleProductsDropdown = () => {
-    setIsProductsOpen(!isProductsOpen)
+    setIsProductsOpen(!isProductsOpen);
     // Close categories dropdown if open
     if (isCategoriesOpen) {
-      setIsCategoriesOpen(false)
+      setIsCategoriesOpen(false);
     }
-  }
+  };
 
   const toggleCategoriesDropdown = () => {
-    setIsCategoriesOpen(!isCategoriesOpen)
+    setIsCategoriesOpen(!isCategoriesOpen);
     // Close products dropdown if open
     if (isProductsOpen) {
-      setIsProductsOpen(false)
+      setIsProductsOpen(false);
     }
-  }
+  };
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
+    setIsMobileMenuOpen(!isMobileMenuOpen);
     // Close other dropdowns
-    setIsProductsOpen(false)
-    setIsCategoriesOpen(false)
-  }
+    setIsProductsOpen(false);
+    setIsCategoriesOpen(false);
+  };
 
   const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false)
-    setIsProductsOpen(false)
-    setIsCategoriesOpen(false)
-  }
+    setIsMobileMenuOpen(false);
+    setIsProductsOpen(false);
+    setIsCategoriesOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -199,11 +233,14 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-sm font-medium hover:text-blue-600 transition-colors">
+            <Link
+              href="/"
+              className="text-sm font-medium hover:text-blue-600 transition-colors"
+            >
               Home
             </Link>
 
-            {/* All Products Dropdown */}
+            {/* All Products Dropdown with Search */}
             <div className="relative" ref={productsDropdownRef}>
               <button
                 className={`flex items-center space-x-1 text-sm font-medium transition-colors ${
@@ -211,8 +248,13 @@ export default function Header() {
                 }`}
                 onClick={toggleProductsDropdown}
               >
-                <span>All Products</span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${isProductsOpen ? "rotate-180" : ""}`} />
+                <Search className="h-4 w-4" />
+                <span>Search Products</span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${
+                    isProductsOpen ? "rotate-180" : ""
+                  }`}
+                />
               </button>
 
               {isProductsOpen && (
@@ -221,7 +263,9 @@ export default function Header() {
                     <CardContent className="p-6">
                       {/* Header with close button */}
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">All Products</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Search Products
+                        </h3>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -238,10 +282,11 @@ export default function Header() {
                           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
                             type="text"
-                            placeholder="Search products..."
+                            placeholder="Search products by name, brand, or category..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="pl-10 pr-4 w-full"
+                            autoFocus
                           />
                         </div>
                       </div>
@@ -249,7 +294,9 @@ export default function Header() {
                       {loading ? (
                         <div className="flex items-center justify-center py-8">
                           <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                          <span className="ml-2 text-sm text-gray-600">Loading products...</span>
+                          <span className="ml-2 text-sm text-gray-600">
+                            Loading products...
+                          </span>
                         </div>
                       ) : (
                         <>
@@ -258,19 +305,22 @@ export default function Header() {
                             {filteredProducts.length === 0 ? (
                               <div className="col-span-full text-center py-8">
                                 <p className="text-gray-500">
-                                  {searchQuery ? "No products found matching your search." : "No products available."}
+                                  {searchQuery
+                                    ? "No products found matching your search."
+                                    : "Start typing to search products..."}
                                 </p>
                               </div>
                             ) : (
                               filteredProducts.map((product) => {
                                 // Add safety checks
-                                if (!product || !product.id) return null
+                                if (!product || !product.id) return null;
 
-                                const badge = getBadge(product)
+                                const badge = getBadge(product);
                                 const originalPrice =
                                   product.discountPercentage > 0
-                                    ? product.price / (1 - product.discountPercentage / 100)
-                                    : product.price
+                                    ? product.price /
+                                      (1 - product.discountPercentage / 100)
+                                    : product.price;
 
                                 return (
                                   <div
@@ -281,7 +331,10 @@ export default function Header() {
                                       {/* Product Image */}
                                       <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-md">
                                         <Image
-                                          src={product.thumbnail || "/placeholder.svg"}
+                                          src={
+                                            product.thumbnail ||
+                                            "/placeholder.svg"
+                                          }
                                           alt={product.title || "Product"}
                                           fill
                                           className="object-cover group-hover:scale-110 transition-transform duration-300"
@@ -314,7 +367,10 @@ export default function Header() {
                                                   <Star
                                                     key={i}
                                                     className={`w-3 h-3 ${
-                                                      i < Math.floor(product.rating || 0)
+                                                      i <
+                                                      Math.floor(
+                                                        product.rating || 0
+                                                      )
                                                         ? "text-yellow-400 fill-current"
                                                         : "text-gray-300"
                                                     }`}
@@ -322,22 +378,36 @@ export default function Header() {
                                                 ))}
                                               </div>
                                               <span className="text-xs text-gray-600">
-                                                {(product.rating || 0).toFixed(1)}
+                                                {(product.rating || 0).toFixed(
+                                                  1
+                                                )}
                                               </span>
                                             </div>
 
                                             {/* Price */}
                                             <div className="flex items-center space-x-2 mt-1">
                                               <span className="text-sm font-bold text-gray-900">
-                                                ${(product.price || 0).toFixed(2)}
+                                                $
+                                                {(product.price || 0).toFixed(
+                                                  2
+                                                )}
                                               </span>
-                                              {(product.discountPercentage || 0) > 0 && (
+                                              {(product.discountPercentage ||
+                                                0) > 0 && (
                                                 <>
                                                   <span className="text-xs text-gray-500 line-through">
                                                     ${originalPrice.toFixed(2)}
                                                   </span>
-                                                  <Badge variant="destructive" className="text-xs px-1 py-0">
-                                                    -{Math.round(product.discountPercentage || 0)}%
+                                                  <Badge
+                                                    variant="destructive"
+                                                    className="text-xs px-1 py-0"
+                                                  >
+                                                    -
+                                                    {Math.round(
+                                                      product.discountPercentage ||
+                                                        0
+                                                    )}
+                                                    %
                                                   </Badge>
                                                 </>
                                               )}
@@ -345,7 +415,9 @@ export default function Header() {
 
                                             {/* Category */}
                                             <p className="text-xs text-gray-400 mt-1">
-                                              {formatCategoryName(product.category || "")}
+                                              {formatCategoryName(
+                                                product.category || ""
+                                              )}
                                             </p>
                                           </div>
 
@@ -355,7 +427,9 @@ export default function Header() {
                                               size="sm"
                                               variant="ghost"
                                               className="h-6 w-6 p-0 hover:bg-blue-100 hover:text-blue-600"
-                                              onClick={(e) => handleAddToCart(product, e)}
+                                              onClick={(e) =>
+                                                handleAddToCart(product, e)
+                                              }
                                               title="Add to Cart"
                                             >
                                               <ShoppingCart className="h-3 w-3" />
@@ -365,7 +439,7 @@ export default function Header() {
                                       </div>
                                     </div>
                                   </div>
-                                )
+                                );
                               })
                             )}
                           </div>
@@ -374,25 +448,27 @@ export default function Header() {
                           <div className="border-t border-gray-200 pt-4">
                             <div className="flex items-center justify-between">
                               <p className="text-sm text-gray-600">
-                                Showing {filteredProducts.length} of {products.length} products
+                                {searchQuery
+                                  ? `Found ${filteredProducts.length} products matching "${searchQuery}"`
+                                  : `${products.length} products available`}
                               </p>
                               <div className="flex space-x-2">
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => {
-                                    setIsProductsOpen(false)
-                                    setIsCategoriesOpen(true)
+                                    setIsProductsOpen(false);
+                                    setIsCategoriesOpen(true);
                                   }}
                                 >
-                                  View Categories
+                                  Browse Categories
                                 </Button>
                                 <Button
                                   size="sm"
                                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                                   onClick={() => setIsProductsOpen(false)}
                                 >
-                                  Browse All
+                                  Close Search
                                 </Button>
                               </div>
                             </div>
@@ -414,7 +490,11 @@ export default function Header() {
                 onClick={toggleCategoriesDropdown}
               >
                 <span>Categories</span>
-                <ChevronDown className={`h-4 w-4 transition-transform ${isCategoriesOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${
+                    isCategoriesOpen ? "rotate-180" : ""
+                  }`}
+                />
               </button>
 
               {isCategoriesOpen && (
@@ -423,7 +503,9 @@ export default function Header() {
                     <CardContent className="p-4">
                       {/* Header with close button */}
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Categories</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          Categories
+                        </h3>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -437,11 +519,15 @@ export default function Header() {
                       {loading ? (
                         <div className="flex items-center justify-center py-8">
                           <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                          <span className="ml-2 text-sm text-gray-600">Loading categories...</span>
+                          <span className="ml-2 text-sm text-gray-600">
+                            Loading categories...
+                          </span>
                         </div>
                       ) : categories.length === 0 ? (
                         <div className="text-center py-4">
-                          <p className="text-sm text-gray-500">Categories temporarily unavailable</p>
+                          <p className="text-sm text-gray-500">
+                            Categories temporarily unavailable
+                          </p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto scrollbar-thin">
@@ -481,24 +567,16 @@ export default function Header() {
                 </div>
               )}
             </div>
-
-            <Link href="/about" className="text-sm font-medium hover:text-blue-600 transition-colors">
-              About
-            </Link>
-            <Link href="/contact" className="text-sm font-medium hover:text-blue-600 transition-colors">
-              Contact
-            </Link>
           </nav>
 
-          {/* Right side icons */}
+          {/* Right side icons - Removed Search and User icons */}
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
-              <Search className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="hidden sm:flex">
-              <User className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon" className="relative" onClick={toggleCart}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={toggleCart}
+            >
               <ShoppingCart className="h-5 w-5" />
               {cartState.itemCount > 0 && (
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 animate-pulse">
@@ -553,7 +631,7 @@ export default function Header() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                       type="text"
-                      placeholder="Search products..."
+                      placeholder="Search categories..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -568,144 +646,81 @@ export default function Header() {
                     className="flex items-center px-4 py-3 text-base font-medium text-gray-900 hover:bg-gray-50 transition-colors"
                     onClick={closeMobileMenu}
                   >
-                    Home
+                    🏠 Home
                   </Link>
 
-                  {/* Mobile Products Section */}
-                  <div className="border-t border-gray-100">
-                    <button
-                      className="flex items-center justify-between w-full px-4 py-3 text-base font-medium text-gray-900 hover:bg-gray-50 transition-colors"
-                      onClick={toggleProductsDropdown}
-                    >
-                      <span>All Products</span>
-                      <ChevronDown className={`h-5 w-5 transition-transform ${isProductsOpen ? "rotate-180" : ""}`} />
-                    </button>
+                  {/* Categories Section */}
+                  <div className="px-4 py-2">
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+                      Shop by Category
+                    </h3>
 
-                    {isProductsOpen && (
-                      <div className="bg-gray-50 px-4 py-2 max-h-64 overflow-y-auto">
-                        {loading ? (
-                          <div className="flex items-center justify-center py-8">
-                            <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                            <span className="ml-2 text-sm text-gray-600">Loading...</span>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            {filteredProducts.slice(0, 6).map((product) => {
-                              if (!product || !product.id) return null
-
-                              return (
-                                <div
-                                  key={product.id}
-                                  className="flex items-center space-x-3 p-2 bg-white rounded-lg border border-gray-200"
-                                >
-                                  <div className="relative w-10 h-10 flex-shrink-0 overflow-hidden rounded">
-                                    <Image
-                                      src={product.thumbnail || "/placeholder.svg"}
-                                      alt={product.title || "Product"}
-                                      fill
-                                      className="object-cover"
-                                    />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="text-sm font-medium text-gray-900 truncate">
-                                      {product.title || "Product"}
-                                    </h4>
-                                    <p className="text-sm font-semibold text-blue-600">
-                                      ${(product.price || 0).toFixed(2)}
-                                    </p>
-                                  </div>
-                                  <button
-                                    onClick={(e) => handleAddToCart(product, e)}
-                                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                                  >
-                                    <ShoppingCart className="h-4 w-4" />
-                                  </button>
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
+                    {loading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        <span className="ml-2 text-sm text-gray-600">
+                          Loading categories...
+                        </span>
+                      </div>
+                    ) : filteredCategories.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-sm text-gray-500">
+                          {searchQuery
+                            ? "No categories found matching your search."
+                            : "Categories temporarily unavailable"}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-1 max-h-96 overflow-y-auto">
+                        {filteredCategories.map((category) => (
+                          <Link
+                            key={category.slug}
+                            href={`/category/${category.slug}`}
+                            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                            onClick={closeMobileMenu}
+                          >
+                            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                              <span className="text-white text-sm font-bold">
+                                {formatCategoryName(category.name).charAt(0)}
+                              </span>
+                            </div>
+                            <div className="flex-1">
+                              <span className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                                {formatCategoryName(category.name)}
+                              </span>
+                              <p className="text-xs text-gray-500">
+                                Browse products
+                              </p>
+                            </div>
+                            <ChevronDown className="h-4 w-4 text-gray-400 rotate-[-90deg]" />
+                          </Link>
+                        ))}
                       </div>
                     )}
                   </div>
-
-                  {/* Mobile Categories Section */}
-                  <div className="border-t border-gray-100">
-                    <button
-                      className="flex items-center justify-between w-full px-4 py-3 text-base font-medium text-gray-900 hover:bg-gray-50 transition-colors"
-                      onClick={toggleCategoriesDropdown}
-                    >
-                      <span>Categories</span>
-                      <ChevronDown className={`h-5 w-5 transition-transform ${isCategoriesOpen ? "rotate-180" : ""}`} />
-                    </button>
-
-                    {isCategoriesOpen && (
-                      <div className="bg-gray-50 px-4 py-2 max-h-64 overflow-y-auto">
-                        {loading ? (
-                          <div className="flex items-center justify-center py-8">
-                            <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                            <span className="ml-2 text-sm text-gray-600">Loading...</span>
-                          </div>
-                        ) : categories.length === 0 ? (
-                          <p className="text-sm text-gray-500 text-center py-4">Categories temporarily unavailable</p>
-                        ) : (
-                          <div className="space-y-1">
-                            {categories.slice(0, 12).map((category) => (
-                              <Link
-                                key={category.slug}
-                                href={`/category/${category.slug}`}
-                                className="flex items-center space-x-3 p-2 bg-white rounded-lg hover:bg-gray-100 transition-colors"
-                                onClick={closeMobileMenu}
-                              >
-                                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded flex items-center justify-center">
-                                  <span className="text-white text-xs font-bold">
-                                    {formatCategoryName(category.name).charAt(0)}
-                                  </span>
-                                </div>
-                                <span className="text-sm font-medium text-gray-900">
-                                  {formatCategoryName(category.name)}
-                                </span>
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <Link
-                    href="/about"
-                    className="flex items-center px-4 py-3 text-base font-medium text-gray-900 hover:bg-gray-50 transition-colors border-t border-gray-100"
-                    onClick={closeMobileMenu}
-                  >
-                    About
-                  </Link>
-                  <Link
-                    href="/contact"
-                    className="flex items-center px-4 py-3 text-base font-medium text-gray-900 hover:bg-gray-50 transition-colors"
-                    onClick={closeMobileMenu}
-                  >
-                    Contact
-                  </Link>
                 </div>
               </div>
 
-              {/* Mobile Menu Footer */}
-              <div className="border-t border-gray-200 p-4 bg-white">
-                <div className="grid grid-cols-2 gap-3">
+              {/* Mobile Menu Footer - Removed Account button */}
+              <div className="border-t border-gray-200 p-4 bg-gray-50">
+                <div className="text-center">
+                  <p className="text-xs text-gray-500 mb-3">
+                    {categories.length} categories • {products.length} products
+                  </p>
                   <button
-                    onClick={closeMobileMenu}
-                    className="flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                    onClick={() => {
+                      toggleCart();
+                      closeMobileMenu();
+                    }}
+                    className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors relative"
                   >
-                    <User className="h-4 w-4 mr-2" />
-                    Account
-                  </button>
-                  <button
-                    onClick={closeMobileMenu}
-                    className="flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    <Search className="h-4 w-4 mr-2" />
-                    Search
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    View Cart
+                    {cartState.itemCount > 0 && (
+                      <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500">
+                        {cartState.itemCount}
+                      </Badge>
+                    )}
                   </button>
                 </div>
               </div>
@@ -714,5 +729,5 @@ export default function Header() {
         </>
       )}
     </header>
-  )
+  );
 }
