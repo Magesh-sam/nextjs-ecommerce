@@ -5,19 +5,31 @@ import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ShoppingCart, Search, Menu, ChevronDown, Star, X } from "lucide-react";
+import {
+  ShoppingCart,
+  Search,
+  Menu,
+  User,
+  ChevronDown,
+  Star,
+  X,
+  LogOut,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { getProducts, getCategories } from "@/lib/api";
 import { useCart } from "@/app/contexts/CartContext";
+import { useAuth } from "@/app/contexts/AuthContext";
 import type { Product, Category } from "@/lib/types";
 
 export default function Header() {
   const { state: cartState, addItem, toggleCart } = useCart();
+  const { state: authState, logout } = useAuth();
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -29,6 +41,7 @@ export default function Header() {
   // Refs for click outside detection
   const productsDropdownRef = useRef<HTMLDivElement>(null);
   const categoriesDropdownRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to close dropdowns
@@ -45,6 +58,12 @@ export default function Header() {
         !categoriesDropdownRef.current.contains(event.target as Node)
       ) {
         setIsCategoriesOpen(false);
+      }
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
       }
       if (
         mobileMenuRef.current &&
@@ -193,18 +212,23 @@ export default function Header() {
 
   const toggleProductsDropdown = () => {
     setIsProductsOpen(!isProductsOpen);
-    // Close categories dropdown if open
-    if (isCategoriesOpen) {
-      setIsCategoriesOpen(false);
-    }
+    // Close other dropdowns
+    setIsCategoriesOpen(false);
+    setIsUserMenuOpen(false);
   };
 
   const toggleCategoriesDropdown = () => {
     setIsCategoriesOpen(!isCategoriesOpen);
-    // Close products dropdown if open
-    if (isProductsOpen) {
-      setIsProductsOpen(false);
-    }
+    // Close other dropdowns
+    setIsProductsOpen(false);
+    setIsUserMenuOpen(false);
+  };
+
+  const toggleUserMenu = () => {
+    setIsUserMenuOpen(!isUserMenuOpen);
+    // Close other dropdowns
+    setIsProductsOpen(false);
+    setIsCategoriesOpen(false);
   };
 
   const toggleMobileMenu = () => {
@@ -212,12 +236,19 @@ export default function Header() {
     // Close other dropdowns
     setIsProductsOpen(false);
     setIsCategoriesOpen(false);
+    setIsUserMenuOpen(false);
   };
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
     setIsProductsOpen(false);
     setIsCategoriesOpen(false);
+    setIsUserMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsUserMenuOpen(false);
   };
 
   return (
@@ -569,8 +600,82 @@ export default function Header() {
             </div>
           </nav>
 
-          {/* Right side icons - Removed Search and User icons */}
+          {/* Right side icons */}
           <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* User Menu */}
+            {authState.isAuthenticated ? (
+              <div className="relative" ref={userMenuRef}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative"
+                  onClick={toggleUserMenu}
+                >
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">
+                      {authState.user?.firstName.charAt(0)}
+                      {authState.user?.lastName.charAt(0)}
+                    </span>
+                  </div>
+                </Button>
+
+                {isUserMenuOpen && (
+                  <div className="absolute top-full right-0 mt-2 w-64 z-50">
+                    <Card className="shadow-xl border-0 bg-white backdrop-blur-sm animate-slide-up">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3 mb-4 pb-4 border-b border-gray-200">
+                          <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold">
+                              {authState.user?.firstName.charAt(0)}
+                              {authState.user?.lastName.charAt(0)}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-900 truncate">
+                              {authState.user?.firstName}{" "}
+                              {authState.user?.lastName}
+                            </p>
+                            <p className="text-sm text-gray-600 truncate">
+                              {authState.user?.email}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Link
+                            href="/account"
+                            className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 transition-colors w-full"
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <User className="h-4 w-4 text-gray-600" />
+                            <span className="text-sm font-medium text-gray-900">
+                              My Account
+                            </span>
+                          </Link>
+
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center space-x-2 p-2 rounded-md hover:bg-red-50 transition-colors w-full text-left"
+                          >
+                            <LogOut className="h-4 w-4 text-red-600" />
+                            <span className="text-sm font-medium text-red-600">
+                              Sign Out
+                            </span>
+                          </button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/auth">
+                <Button variant="ghost" size="icon" className="hidden sm:flex">
+                  <User className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
+
             <Button
               variant="ghost"
               size="icon"
@@ -582,6 +687,13 @@ export default function Header() {
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500 animate-pulse">
                   {cartState.itemCount}
                 </Badge>
+              )}
+              {/* User-specific cart indicator */}
+              {authState.isAuthenticated && cartState.itemCount > 0 && (
+                <div
+                  className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"
+                  title="Personal cart"
+                />
               )}
             </Button>
             <Button
@@ -625,6 +737,62 @@ export default function Header() {
 
               {/* Mobile Menu Content */}
               <div className="flex-1 overflow-y-auto bg-white">
+                {/* User Section */}
+                {authState.isAuthenticated ? (
+                  <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold">
+                          {authState.user?.firstName.charAt(0)}
+                          {authState.user?.lastName.charAt(0)}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-900 truncate">
+                          {authState.user?.firstName} {authState.user?.lastName}
+                        </p>
+                        <p className="text-sm text-gray-600 truncate">
+                          {authState.user?.email}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex space-x-2">
+                      <Link
+                        href="/account"
+                        className="flex-1 text-center px-3 py-2 text-sm font-medium text-blue-600 bg-white rounded-lg hover:bg-blue-50 transition-colors"
+                        onClick={closeMobileMenu}
+                      >
+                        My Account
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          closeMobileMenu();
+                        }}
+                        className="flex-1 text-center px-3 py-2 text-sm font-medium text-red-600 bg-white rounded-lg hover:bg-red-50 transition-colors"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50">
+                    <div className="text-center">
+                      <p className="text-gray-600 mb-3">
+                        Sign in to access your account
+                      </p>
+                      <Link
+                        href="/auth"
+                        className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-colors"
+                        onClick={closeMobileMenu}
+                      >
+                        <User className="h-4 w-4 mr-2" />
+                        Sign In / Sign Up
+                      </Link>
+                    </div>
+                  </div>
+                )}
+
                 {/* Search Bar */}
                 <div className="p-4 border-b border-gray-100">
                   <div className="relative">
@@ -701,7 +869,7 @@ export default function Header() {
                 </div>
               </div>
 
-              {/* Mobile Menu Footer - Removed Account button */}
+              {/* Mobile Menu Footer */}
               <div className="border-t border-gray-200 p-4 bg-gray-50">
                 <div className="text-center">
                   <p className="text-xs text-gray-500 mb-3">
@@ -720,6 +888,13 @@ export default function Header() {
                       <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-500">
                         {cartState.itemCount}
                       </Badge>
+                    )}
+                    {/* User-specific cart indicator */}
+                    {authState.isAuthenticated && cartState.itemCount > 0 && (
+                      <div
+                        className="absolute top-0 right-0 w-2 h-2 bg-green-400 rounded-full"
+                        title="Personal cart"
+                      />
                     )}
                   </button>
                 </div>

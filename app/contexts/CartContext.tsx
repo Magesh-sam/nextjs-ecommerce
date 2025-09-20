@@ -3,6 +3,7 @@
 import type React from "react"
 import { createContext, useContext, useReducer, useEffect } from "react"
 import type { Product } from "@/lib/types"
+import { useAuth } from "./AuthContext"
 
 export interface CartItem extends Product {
   quantity: number
@@ -162,34 +163,44 @@ const CartContext = createContext<{
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState)
+  const { state: authState } = useAuth()
 
-  // Load cart from localStorage on mount
+  // Load user-specific cart from localStorage on mount and when user changes
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
-        const savedCart = localStorage.getItem("shophub-cart")
+        const userId = authState.user?.id || "anonymous"
+        const cartKey = `shophub-cart-${userId}`
+        const savedCart = localStorage.getItem(cartKey)
+
         if (savedCart) {
           const cartItems = JSON.parse(savedCart)
-          console.log("Loading cart from localStorage:", cartItems.length, "items")
+          console.log(`Loading cart for user ${userId}:`, cartItems.length, "items")
           dispatch({ type: "LOAD_CART", payload: cartItems })
+        } else {
+          // Clear cart if no saved cart for this user
+          dispatch({ type: "LOAD_CART", payload: [] })
         }
       } catch (error) {
-        console.error("Error loading cart from localStorage:", error)
+        console.error("Error loading user cart from localStorage:", error)
+        dispatch({ type: "LOAD_CART", payload: [] })
       }
     }
-  }, [])
+  }, [authState.user?.id]) // Re-run when user changes
 
-  // Save cart to localStorage whenever it changes
+  // Save user-specific cart to localStorage whenever cart or user changes
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem("shophub-cart", JSON.stringify(state.items))
-        console.log("Cart saved to localStorage:", state.items.length, "items")
+        const userId = authState.user?.id || "anonymous"
+        const cartKey = `shophub-cart-${userId}`
+        localStorage.setItem(cartKey, JSON.stringify(state.items))
+        console.log(`Cart saved for user ${userId}:`, state.items.length, "items")
       } catch (error) {
-        console.error("Error saving cart to localStorage:", error)
+        console.error("Error saving user cart to localStorage:", error)
       }
     }
-  }, [state.items])
+  }, [state.items, authState.user?.id])
 
   const addItem = (
     product: Product,

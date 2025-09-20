@@ -1,15 +1,19 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import { CartProvider } from "./contexts/CartContext"
-import CartSidebar from "./components/CartSidebar"
-import "./globals.css"
+import type React from "react";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { CartProvider } from "./contexts/CartContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import CartSidebar from "./components/CartSidebar";
+import CartPersistenceNotification from "./components/CartPersistenceNotification";
+import UserCartStats from "./components/UserCartStats";
+import CartMergeDialog from "./components/CartMergeDialog";
+import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
-})
+});
 
 export const metadata: Metadata = {
   title: {
@@ -18,7 +22,14 @@ export const metadata: Metadata = {
   },
   description:
     "Discover premium products at unbeatable prices. Shop the latest trends in electronics, fashion, and lifestyle with fast, free shipping.",
-  keywords: ["e-commerce", "online shopping", "premium products", "electronics", "fashion", "lifestyle"],
+  keywords: [
+    "e-commerce",
+    "online shopping",
+    "premium products",
+    "electronics",
+    "fashion",
+    "lifestyle",
+  ],
   authors: [{ name: "ShopHub Team" }],
   creator: "ShopHub",
   publisher: "ShopHub",
@@ -49,22 +60,26 @@ export const metadata: Metadata = {
   verification: {
     google: "your-google-verification-code",
   },
-    generator: 'v0.app'
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en" className={inter.variable}>
       <body className={`${inter.className} antialiased min-h-screen`}>
-        <CartProvider>
-          {children}
-          <CartSidebar />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            {children}
+            <CartSidebar />
+            <CartPersistenceNotification />
+            <UserCartStats />
+            <CartMergeDialog />
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
-  )
+  );
 }

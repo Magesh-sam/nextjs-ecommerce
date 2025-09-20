@@ -5,12 +5,14 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
-import { X, Plus, Minus, ShoppingBag, Trash2, ArrowRight } from "lucide-react"
+import { X, Plus, Minus, ShoppingCart, Trash2, ArrowRight } from "lucide-react"
 import { useCart } from "@/app/contexts/CartContext"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/app/contexts/AuthContext"
 
 export default function CartSidebar() {
   const { state, removeItem, updateQuantity, closeCart } = useCart()
+  const { state: authState } = useAuth()
   const [isCheckingOut, setIsCheckingOut] = useState(false)
   const router = useRouter()
 
@@ -46,8 +48,13 @@ export default function CartSidebar() {
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
             <div className="flex items-center space-x-2">
-              <ShoppingBag className="h-6 w-6 text-blue-600" />
-              <h2 className="text-xl font-bold text-gray-900">Shopping Cart</h2>
+              <ShoppingCart className="h-6 w-6 text-blue-600" />
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Shopping Cart</h2>
+                {authState.isAuthenticated && (
+                  <p className="text-xs text-gray-500">{authState.user?.firstName}'s Cart</p>
+                )}
+              </div>
               {state.itemCount > 0 && <Badge className="bg-blue-600">{state.itemCount}</Badge>}
             </div>
             <Button variant="ghost" size="icon" onClick={closeCart}>
@@ -60,7 +67,7 @@ export default function CartSidebar() {
             {state.items.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <ShoppingBag className="h-12 w-12 text-gray-400" />
+                  <ShoppingCart className="h-12 w-12 text-gray-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Your cart is empty</h3>
                 <p className="text-gray-600 mb-6">Add some products to get started!</p>
@@ -175,6 +182,17 @@ export default function CartSidebar() {
           {/* Footer */}
           {state.items.length > 0 && (
             <div className="border-t border-gray-200 p-6 space-y-4">
+              {/* User-specific message */}
+              {authState.isAuthenticated ? (
+                <div className="text-xs text-gray-600 text-center mb-2">
+                  <span>Cart saved to your account</span>
+                </div>
+              ) : (
+                <div className="text-xs text-gray-600 text-center mb-2">
+                  <span>Sign in to save your cart</span>
+                </div>
+              )}
+
               {/* Subtotal */}
               <div className="flex items-center justify-between text-lg font-bold">
                 <span>Subtotal:</span>

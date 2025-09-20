@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/app/contexts/AuthContext";
 import {
   ArrowLeft,
   CreditCard,
@@ -86,23 +87,26 @@ const paymentMethods = [
 export default function CheckoutForm() {
   const router = useRouter();
   const { state: cartState, clearCart } = useCart();
+  const { state: authState } = useAuth();
   const [formData, setFormData] = useState<CheckoutFormData>({
-    email: "",
-    firstName: "",
-    lastName: "",
+    email: authState.user?.email || "",
+    firstName: authState.user?.firstName || "",
+    lastName: authState.user?.lastName || "",
     address: "",
     city: "",
     state: "",
     zipCode: "",
     country: "US",
-    phone: "",
+    phone: authState.user?.phone || "",
     paymentMethod: "card",
     cardNumber: "",
     expiryDate: "",
     cvv: "",
-    nameOnCard: "",
+    nameOnCard: authState.user
+      ? `${authState.user.firstName} ${authState.user.lastName}`
+      : "",
     upiId: "",
-    phoneNumber: "",
+    phoneNumber: authState.user?.phone || "",
   });
   const [errors, setErrors] = useState<Partial<CheckoutFormData>>({});
   const [isProcessing, setIsProcessing] = useState(false);
@@ -347,6 +351,21 @@ export default function CheckoutForm() {
                 <CardTitle className="flex items-center space-x-2">
                   <span>Contact Information</span>
                 </CardTitle>
+                {authState.isAuthenticated && (
+                  <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center space-x-2 text-sm text-blue-800">
+                      <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">
+                          {authState.user?.firstName.charAt(0)}
+                        </span>
+                      </div>
+                      <span>
+                        Signed in as {authState.user?.firstName}{" "}
+                        {authState.user?.lastName}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -697,7 +716,7 @@ export default function CheckoutForm() {
                       )}
                     </div>
                     <p className="text-sm text-gray-600">
-                      You'll be redirected to your UPI app to complete the
+                      You&apos;ll be redirected to your UPI app to complete the
                       payment.
                     </p>
                   </div>
@@ -726,8 +745,8 @@ export default function CheckoutForm() {
                       Digital Wallet
                     </h5>
                     <p className="text-sm text-blue-700">
-                      You'll be redirected to your preferred wallet provider to
-                      complete the payment.
+                      You&apos;ll be redirected to your preferred wallet
+                      provider to complete the payment.
                     </p>
                     <div className="mt-3 flex space-x-2">
                       <Badge variant="secondary">PayPal</Badge>
@@ -760,8 +779,8 @@ export default function CheckoutForm() {
                       )}
                     </div>
                     <p className="text-sm text-gray-600">
-                      You'll be redirected to your bank's secure portal to
-                      complete the payment.
+                      You&apos;ll be redirected to your bank&apos;s secure
+                      portal to complete the payment.
                     </p>
                   </div>
                 )}
